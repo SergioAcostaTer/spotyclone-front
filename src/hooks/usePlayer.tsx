@@ -1,8 +1,9 @@
+import { Track } from "../services/search";
 import { ToSave } from "../types";
 import { create } from "zustand";
 
 interface PlayerState {
-  likedSongs: ToSave[];
+  likedSongs: Track[];
   songs: ToSave[];
   currentSongIndex: number;
   isPlaying: boolean;
@@ -13,11 +14,13 @@ interface PlayerState {
   play: () => void;
   pause: () => void;
   shuffle: () => void;
-  addLikedSong: (song: ToSave) => void;
-  removeLikedSong: (song: ToSave) => void;
+  addLikedSong: (song: Track) => void;
+  removeLikedSong: (song: Track) => void;
 }
 
-const storedLikedSongs = JSON.parse(localStorage.getItem("liked")) || [];
+const storedLikedSongsString = localStorage.getItem("liked");
+const storedLikedSongs = storedLikedSongsString ? JSON.parse(storedLikedSongsString) : [];
+
 
 const usePlayer = create<PlayerState>((set) => ({
   songs: [],
@@ -91,7 +94,7 @@ const usePlayer = create<PlayerState>((set) => ({
   removeLikedSong: (song) => {
     set((state) => {
       const updatedLikedSongs = state.likedSongs.filter(
-        (likedSong: ToSave) => likedSong !== song
+        (likedSong: Track) => likedSong !== song
       );
       localStorage.setItem("liked", JSON.stringify(updatedLikedSongs));
       return { likedSongs: updatedLikedSongs };

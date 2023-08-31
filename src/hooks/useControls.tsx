@@ -10,10 +10,10 @@ interface ControlFunctions {
   pause: () => void;
   nextSong: () => void;
   prevSong: () => void;
-  getLikedSongs: () => ToSave[];
-  addLikedSong: (song: ToSave) => void;
-  removeLikedSong: (song: ToSave) => void;
-  handleLikeSong: (song: ToSave) => void;
+  getLikedSongs: () => Track[];
+  addLikedSong: (song: Track) => void;
+  removeLikedSong: (song: Track) => void;
+  handleLikeSong: (song: Track) => void;
 }
 
 const useControl = (): ControlFunctions => {
@@ -87,15 +87,15 @@ const useControl = (): ControlFunctions => {
     return usePlayer.getState().likedSongs;
   };
 
-  const addLikedSong = (song: ToSave) => {
+  const addLikedSong = (song: Track) => {
     addLikedSongToPlayer(song);
   };
 
-  const removeLikedSong = (song: ToSave) => {
+  const removeLikedSong = (song: Track) => {
     removeLikedSongFromPlayer(song);
   };
 
-  const handleLikeSong = (song: ToSave) => {
+  const handleLikeSong = (song: Track) => {
     if (usePlayer.getState().likedSongs.includes(song)) {
       removeLikedSong(song);
     } else {

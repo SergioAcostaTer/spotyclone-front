@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useControl from "../hooks/useControls";
-import { ToSave } from "../types";
+import { Track } from "../services/search";
 
 interface Props {
-  song: ToSave;
+  song: Track;
 }
 
 const SongCard = ({ song }: Props) => {
