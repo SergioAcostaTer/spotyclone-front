@@ -13,14 +13,11 @@ const MusicPlayer = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <ReactPlayer
-        width={400}
-        height={200}
+        width={0}
+        height={0}
         playing={isPlaying}
         url={songs?.[currentSongIndex]?.url}
         onEnded={nextSong}
-        style={{
-          zIndex: 100
-        }}
       />
       {children}
     </>
