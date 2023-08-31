@@ -1,26 +1,36 @@
-import useControl from '../hooks/useControls';
-import { SearchResult } from '../types';
+import { useEffect, useState } from "react";
+import useControl from "../hooks/useControls";
+import { ToSave } from "../types";
 
 interface Props {
-  song: SearchResult
+  song: ToSave;
 }
 
 const SongCard = ({ song }: Props) => {
-  const {addAndPlay} = useControl()
+  const { addAndPlay, handleLikeSong, getLikedSongs } = useControl();
+  const [liked, setLiked] = useState(getLikedSongs().find(e => e.id == song.id) ? true : false);
 
+
+  const handleLike = () => {
+    handleLikeSong(song);
+    setLiked(!liked)
+  };
 
   return (
-    <div className="flex items-center space-x-4 p-4 border-b border-gray-200" onClick={() => addAndPlay(song)}>
-      <img src={song.thumbnail} alt={`${song.title} Thumbnail`} className="w-16 h-16 rounded-md" />
-      <div className="flex-grow">
-        <h2 className="text-lg font-medium">{song.title}</h2>
-        <p className="text-gray-500">{song.artist}</p>
+    <div className="flex items-center space-x-4 p-4 border-b border-gray-200">
+      <div className="flex w-full" onClick={() => addAndPlay(song)}>
+        <img
+          src={song.thumbnail}
+          alt={`${song.title} Thumbnail`}
+          className="w-16 h-16 rounded-md"
+        />
+        <div className="flex-grow ml-2">
+          <h2 className="text-lg font-medium">{song.title}</h2>
+          <p className="text-gray-500">{song.artist}</p>
+        </div>
       </div>
-      <div className="flex items-center space-x-2">
-        <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16M8 20V4" />
-        </svg>
+      <div className="flex items-center space-x-2" onClick={handleLike}>
+        {liked ? "liked" : "not liked"}
       </div>
     </div>
   );

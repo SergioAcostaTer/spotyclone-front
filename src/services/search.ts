@@ -12,6 +12,7 @@ export interface Track {
   duration: number;
   popularity: number;
   type: string;
+  color: string
 }
 
 async function search(title: string): Promise<Track[]> {

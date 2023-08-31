@@ -1,8 +1,8 @@
 import { ToSave } from "../types";
 import { create } from "zustand";
 
-
 interface PlayerState {
+  likedSongs: ToSave[];
   songs: ToSave[];
   currentSongIndex: number;
   isPlaying: boolean;
@@ -13,7 +13,11 @@ interface PlayerState {
   play: () => void;
   pause: () => void;
   shuffle: () => void;
+  addLikedSong: (song: ToSave) => void;
+  removeLikedSong: (song: ToSave) => void;
 }
+
+const storedLikedSongs = JSON.parse(localStorage.getItem("liked")) || [];
 
 const usePlayer = create<PlayerState>((set) => ({
   songs: [],
@@ -25,9 +29,13 @@ const usePlayer = create<PlayerState>((set) => ({
   setActualSong: (song) => {
     set((state) => ({
       ...state,
-      songs: [song, ...state.songs.slice(0, state.currentSongIndex), ...state.songs.slice(state.currentSongIndex + 1)],
+      songs: [
+        song,
+        ...state.songs.slice(0, state.currentSongIndex),
+        ...state.songs.slice(state.currentSongIndex + 1),
+      ],
       currentSongIndex: 0,
-      isPlaying: true
+      isPlaying: true,
     }));
   },
   nextSong: () => {
@@ -39,13 +47,14 @@ const usePlayer = create<PlayerState>((set) => ({
   prevSong: () => {
     set((state) => ({
       ...state,
-      currentSongIndex: (state.currentSongIndex - 1 + state.songs.length) % state.songs.length,
+      currentSongIndex:
+        (state.currentSongIndex - 1 + state.songs.length) % state.songs.length,
     }));
   },
   play: () => {
     set((state) => {
-        console.log(state.songs)
-        return { ...state, isPlaying: true }
+      console.log(state.songs);
+      return { ...state, isPlaying: true };
     });
   },
   pause: () => {
@@ -56,13 +65,36 @@ const usePlayer = create<PlayerState>((set) => ({
       const shuffledSongs = [...state.songs];
       for (let i = shuffledSongs.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffledSongs[i], shuffledSongs[j]] = [shuffledSongs[j], shuffledSongs[i]];
+        [shuffledSongs[i], shuffledSongs[j]] = [
+          shuffledSongs[j],
+          shuffledSongs[i],
+        ];
       }
       return {
         ...state,
         songs: shuffledSongs,
         currentSongIndex: 0,
       };
+    });
+  },
+
+  likedSongs: storedLikedSongs,
+
+  addLikedSong: (song) => {
+    set((state) => {
+      const updatedLikedSongs = [...state.likedSongs, song];
+      localStorage.setItem("liked", JSON.stringify(updatedLikedSongs));
+      return { likedSongs: updatedLikedSongs };
+    });
+  },
+
+  removeLikedSong: (song) => {
+    set((state) => {
+      const updatedLikedSongs = state.likedSongs.filter(
+        (likedSong: ToSave) => likedSong !== song
+      );
+      localStorage.setItem("liked", JSON.stringify(updatedLikedSongs));
+      return { likedSongs: updatedLikedSongs };
     });
   },
 }));

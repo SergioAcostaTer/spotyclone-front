@@ -4,17 +4,26 @@ import { Track } from "../services/search";
 import { getYT } from "../services/getFromYt";
 
 interface ControlFunctions {
-    addSong: (spotify: Track, youtube: SearchResult) => void; // Include this line
-    addAndPlay: (spotify: Track) => void;
-    play: () => void;
-    pause: () => void;
-    nextSong: () => void;
-    prevSong: () => void;
-  }
-  
+  addSong: (spotify: Track, youtube: SearchResult) => void;
+  addAndPlay: (spotify: Track) => void;
+  play: () => void;
+  pause: () => void;
+  nextSong: () => void;
+  prevSong: () => void;
+  getLikedSongs: () => ToSave[];
+  addLikedSong: (song: ToSave) => void;
+  removeLikedSong: (song: ToSave) => void;
+  handleLikeSong: (song: ToSave) => void;
+}
 
 const useControl = (): ControlFunctions => {
-  const [addNP, add] = usePlayer((state) => [state.setActualSong, state.addSong]);
+  const [addNP, add, addLikedSongToPlayer, removeLikedSongFromPlayer] =
+    usePlayer((state) => [
+      state.setActualSong,
+      state.addSong,
+      state.addLikedSong,
+      state.removeLikedSong,
+    ]);
   const [isPlaying] = usePlayer((state) => [state.isPlaying]);
 
   const mountSong = (spotify: Track): Promise<ToSave> => {
@@ -35,6 +44,7 @@ const useControl = (): ControlFunctions => {
         views: youtube.views,
         duration: youtube.duration,
         popularity: spotify.popularity,
+        color: spotify.color,
       };
       return toSave;
     });
@@ -42,17 +52,15 @@ const useControl = (): ControlFunctions => {
 
   const addSong = async (spotify: Track) => {
     const song = await mountSong(spotify);
-    add(song)
+    add(song);
   };
-  
 
   const addAndPlay = async (spotify: Track) => {
-    console.log(spotify)
+    console.log(spotify);
     const song = await mountSong(spotify);
-    console.log(song) //return undefined
+    console.log(song); //return undefined
     addNP(song);
   };
-
 
   const play = () => {
     if (!isPlaying) {
@@ -62,7 +70,7 @@ const useControl = (): ControlFunctions => {
 
   const pause = () => {
     if (isPlaying) {
-        console.log("pause")
+      console.log("pause");
       usePlayer.getState().pause();
     }
   };
@@ -75,7 +83,39 @@ const useControl = (): ControlFunctions => {
     usePlayer.getState().prevSong();
   };
 
-  return { addAndPlay, play, pause, nextSong, prevSong, addSong };
+  const getLikedSongs = () => {
+    return usePlayer.getState().likedSongs;
+  };
+
+  const addLikedSong = (song: ToSave) => {
+    addLikedSongToPlayer(song);
+  };
+
+  const removeLikedSong = (song: ToSave) => {
+    removeLikedSongFromPlayer(song);
+  };
+
+  const handleLikeSong = (song: ToSave) => {
+    if (usePlayer.getState().likedSongs.includes(song)) {
+      removeLikedSong(song);
+    } else {
+      addLikedSong(song);
+    }
+  };
+  
+
+  return {
+    addAndPlay,
+    play,
+    pause,
+    nextSong,
+    prevSong,
+    addSong,
+    getLikedSongs,
+    addLikedSong,
+    removeLikedSong,
+    handleLikeSong
+  };
 };
 
 export default useControl;

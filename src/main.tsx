@@ -5,6 +5,6 @@ import { MusicPlayer } from "./components/MusicPlayer.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <MusicPlayer>
-    <App />
+      <App />
   </MusicPlayer>
 );
