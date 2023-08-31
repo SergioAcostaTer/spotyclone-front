@@ -18,6 +18,7 @@ const MusicPlayer = ({ children }: { children: React.ReactNode }) => {
         playing={isPlaying}
         url={songs?.[currentSongIndex]?.url}
         onEnded={nextSong}
+        playsInline
       />
       {children}
     </>
