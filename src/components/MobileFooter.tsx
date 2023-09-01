@@ -9,15 +9,13 @@ interface MobileLayoutProps {
 }
 
 const MobileFooter = ({ children }: MobileLayoutProps) => {
-  const [songs, index, isPlaying, play, pause] = usePlayer((state) => [
+  const [songs, index, isPlaying, play, pause, likedSongs] = usePlayer((state) => [
     state.songs,
     state.currentSongIndex,
     state.isPlaying,
     state.play, 
-    state.pause
+    state.pause, state.likedSongs
   ]);
-
-  const [likedSongs] = usePlayer(state => [state.likedSongs])
 
   const [liked, setLiked] = useState(
     likedSongs.find((e) => e.id == songs[index]?.id) ? true : false

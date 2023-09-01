@@ -10,15 +10,15 @@ const Saved: React.FC = () => {
   return (
     <div className='w-full'>
       <h1>Liked Songs</h1>
-      <h2 onClick={nextSong}>prev</h2>
+      <h2 onClick={prevSong}>prev</h2>
 
       <h2 onClick={playLiked}>Play all</h2>
-      <h2 onClick={prevSong}>next</h2>
+      <h2 onClick={nextSong}>next</h2>
       {likedSongs.length === 0 ? (
         <p>No liked songs available.</p>
       ) : (
         <div className='w-full'>
-          {[...likedSongs].reverse().map((song) => (
+          {[...likedSongs].map((song) => (
             <SongCard key={song.id} song={song} />
           ))}
         </div>

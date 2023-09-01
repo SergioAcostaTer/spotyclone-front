@@ -48,7 +48,7 @@ const mountSong = async (spotify: Track): Promise<ToSave> => {
 
 const storedLikedSongsString = localStorage.getItem("liked");
 const storedLikedSongs = storedLikedSongsString
-  ? JSON.parse(storedLikedSongsString)
+  ? JSON.parse(storedLikedSongsString).reverse()
   : [];
 
 const usePlayer = create<PlayerState>((set) => ({
@@ -123,7 +123,7 @@ const usePlayer = create<PlayerState>((set) => ({
     const song = await mountSong(spotify);
     set((state) => ({
       ...state,
-      songs: [song, ...state.songs.slice(1)], // Replace the first song with the new one
+      songs: [song, ...state.songs.slice(1, 0)], // Replace the first song with the new one
       isPlaying: true,
     }));
   },

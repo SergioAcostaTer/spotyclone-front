@@ -10,9 +10,11 @@ const MusicPlayer = ({ children }: { children: React.ReactNode }) => {
     state.nextSong
   ]);
 
+
+
   useEffect(() => {
-    console.log(isPlaying, songs)
-  },[isPlaying, songs])
+    console.log(isPlaying, songs, currentSongIndex)
+  },[isPlaying, songs, currentSongIndex])
 
   return (
     <>
