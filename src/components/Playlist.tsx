@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SongCard from "../components/SongCard";
 import { Track } from "../services/search";
 import usePlayer from "../hooks/usePlayer";
