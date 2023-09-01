@@ -7,11 +7,16 @@ const SearchPage = () => {
   const q = typeof params.q === "string" ? params.q : "";
   const [results, loading, query, onInputChange] = useSearch(q);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
+
   return (
     <div>
       <h1>Buscar</h1>
 
-      <form className="mx-[5px]">
+      <form className="mx-[5px]" onSubmit={handleSubmit}>
         <label
           htmlFor="default-search"
           className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
