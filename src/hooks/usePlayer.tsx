@@ -121,11 +121,15 @@ const usePlayer = create<PlayerState>((set) => ({
   },
   addAndPlay: async (spotify: Track) => {
     const song = await mountSong(spotify);
-    set((state) => ({
-      ...state,
-      songs: [song, ...state.songs.slice(1, 0)], // Replace the first song with the new one
-      isPlaying: true,
-    }));
+    set((state) => {
+      const newSongs = [...state.songs]; // Create a copy of the original songs array
+      newSongs[state.currentSongIndex] = song; // Replace the song at the specified index
+      return {
+        ...state,
+        songs: newSongs,
+        isPlaying: true,
+      };
+    });
   },
   handleLikeSong: (song: Track) => {
     const likedSongs = usePlayer.getState().likedSongs;
