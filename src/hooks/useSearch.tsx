@@ -7,6 +7,7 @@ const useSearch = (
   const [results, setResults] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [actualQ, setActualQ] = useState(decodeURI(initialQuery));
+  const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
 
   const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
     event
@@ -15,17 +16,33 @@ const useSearch = (
     setActualQ(newQuery);
     const newUrl = `/search/${encodeURIComponent(newQuery)}`;
     window.history.replaceState(null, "", newUrl);
+
+    // Clear the previous search timer (if any) and start a new one
+    if (searchTimer) {
+      clearTimeout(searchTimer);
+    }
+    setSearchTimer(
+      setTimeout(() => {
+        // Perform the search after a delay of, for example, 500 milliseconds
+        setLoading(true);
+        search(newQuery).then((searchResults) => {
+          setResults(searchResults);
+          setLoading(false);
+        });
+      }, 700) // Adjust the delay as needed
+    );
   };
-  
+
   useEffect(() => {
-    setLoading(true);
-    search(actualQ).then((searchResults) => {
-      setResults(searchResults);
-      setLoading(false);
-    });
-  }, [actualQ]);
+    // Clear the search timer when the component unmounts
+    return () => {
+      if (searchTimer) {
+        clearTimeout(searchTimer);
+      }
+    };
+  }, [searchTimer]);
 
   return [results, loading, actualQ, handleInputChange];
 };
 
-export {useSearch}
+export { useSearch };
