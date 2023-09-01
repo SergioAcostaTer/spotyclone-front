@@ -1,5 +1,5 @@
 import usePlayer from "../hooks/usePlayer";
-import React from "react";
+import React, { useEffect } from "react";
 import ReactPlayer from "react-player";
 
 const MusicPlayer = ({ children }: { children: React.ReactNode }) => {
@@ -9,6 +9,10 @@ const MusicPlayer = ({ children }: { children: React.ReactNode }) => {
     state.songs,
     state.nextSong
   ]);
+
+  useEffect(() => {
+    console.log(isPlaying, songs)
+  },[isPlaying, songs])
 
   return (
     <>
