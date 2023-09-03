@@ -3,18 +3,17 @@ import React, { useEffect } from "react";
 import ReactPlayer from "react-player";
 
 const MusicPlayer = ({ children }: { children: React.ReactNode }) => {
-  const [isPlaying, currentSongIndex, songs, nextSong ] = usePlayer((state) => [
+  const [isPlaying, currentSongIndex, songs, nextSong, setProgress] = usePlayer((state) => [
     state.isPlaying,
     state.currentSongIndex,
     state.songs,
-    state.nextSong
+    state.nextSong,
+    state.setProgress,
   ]);
 
-
-
   useEffect(() => {
-    console.log(isPlaying, songs, currentSongIndex)
-  },[isPlaying, songs, currentSongIndex])
+    console.log(isPlaying, songs, currentSongIndex);
+  }, [isPlaying, songs, currentSongIndex]);
 
   return (
     <>
@@ -25,6 +24,11 @@ const MusicPlayer = ({ children }: { children: React.ReactNode }) => {
         url={songs?.[currentSongIndex]?.url}
         onEnded={nextSong}
         playsInline
+        onProgress={(state) => {
+          setProgress(state.playedSeconds);
+        }}
+        progressInterval={500}
+        loop={songs?.length == 1 ? true : false}
       />
       {children}
     </>

@@ -8,26 +8,43 @@ interface Props {
 }
 
 const SongCard = ({ song }: Props) => {
-  const [likedSongs, addAndPlay, addLiked, removeLiked, songs, index] = usePlayer(state => [state.likedSongs, state.addAndPlay, state.addLikedSong, state.removeLikedSong, state.songs, state.currentSongIndex])
+  const [
+    addAndPlay,
+    addLiked,
+    removeLiked,
+    songs,
+    index,
+    playlists,
+  ] = usePlayer((state) => [
+    state.addAndPlay,
+    state.addSongToPlaylist,
+    state.removeSongFromPlaylist,
+    state.songs,
+    state.currentSongIndex,
+    state.playlists,
+  ]);
 
   const handleLikeSong = (song: Track) => {
-    if (usePlayer.getState().likedSongs.includes(song)) {
-      removeLiked(song);
+    addLiked("liked", song);
+    console.log(playlists.liked);
+
+    if (playlists.liked.includes(song)) {
+      removeLiked("liked", song);
     } else {
-      addLiked(song);
+      addLiked("liked", song);
     }
   };
 
   const [liked, setLiked] = useState(
-    likedSongs.find((e) => e.id == song.id) ? true : false
+    playlists.liked.find((e) => e.id == song.id) ? true : false
   );
   const [sounding, setSounding] = useState(
     songs[index]?.id == song?.id ? true : false
-  )
+  );
 
-  useEffect(() =>{
-    setSounding(songs[index]?.id == song?.id ? true : false)
-  },[index,songs])
+  useEffect(() => {
+    setSounding(songs[index]?.id == song?.id ? true : false);
+  }, [index, songs]);
 
   const handleLike = () => {
     handleLikeSong(song);
@@ -43,8 +60,12 @@ const SongCard = ({ song }: Props) => {
           className="w-[45px] h-[45px] rounded-md object-contain"
         />
         <div className="flex-grow ml-2">
-          <h2 className="text-sm font-medium" 
-          style={{color: sounding ? "green" : "white"}}>{song.title}</h2>
+          <h2
+            className="text-sm font-medium"
+            style={{ color: sounding ? "green" : "white" }}
+          >
+            {song.title}
+          </h2>
           <p className="text-gray-500">{song.artist}</p>
         </div>
       </div>

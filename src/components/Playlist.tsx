@@ -11,13 +11,15 @@ interface PlaylistProps {
 const Playlist: React.FC<PlaylistProps> = ({ title = "Liked", songs }) => {
   const [shuffle, setShuffle] = useState(true);
   const [played, setPlayed] = useState(false);
-  const [play, pause, playLiked, shuffleList, playing] = usePlayer((state) => [
-    state.play,
-    state.pause,
-    state.playLiked,
-    state.shuffle,
-    state.isPlaying,
-  ]);
+  const [play, pause, shuffleList, playing, playPlaylist] = usePlayer(
+    (state) => [
+      state.play,
+      state.pause,
+      state.shuffle,
+      state.isPlaying,
+      state.playPLaylist,
+    ]
+  );
 
   const handlePlay = () => {
     if (playing) {
@@ -26,12 +28,10 @@ const Playlist: React.FC<PlaylistProps> = ({ title = "Liked", songs }) => {
       if (played) {
         play();
       } else {
-        playLiked().then(() => {
-          if (shuffle && !played) {
-            shuffleList();
-          }
-        });
-
+        playPlaylist("liked");
+        if (shuffle && !played) {
+          shuffleList();
+        }
         setPlayed(true);
       }
     }
@@ -100,11 +100,11 @@ const Playlist: React.FC<PlaylistProps> = ({ title = "Liked", songs }) => {
         </div>
       </div>
 
-      {songs.length === 0 ? (
+      {songs?.length === 0 ? (
         <p>No songs in the playlist.</p>
       ) : (
         <div className="w-full mb-[117px]">
-          {songs.map((song) => (
+          {songs?.map((song) => (
             <SongCard key={song.id} song={song} />
           ))}
         </div>
