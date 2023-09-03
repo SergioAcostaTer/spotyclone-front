@@ -1,25 +1,25 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SongCard from "../components/SongCard";
 import { Track } from "../services/search";
 import usePlayer from "../hooks/usePlayer";
+import { useParams } from "react-router-dom";
 
-interface PlaylistProps {
-  title: string;
-  songs: Track[];
-}
-
-const Playlist: React.FC<PlaylistProps> = ({ title = "Liked", songs }) => {
+const Playlist = () => {
   const [shuffle, setShuffle] = useState(true);
   const [played, setPlayed] = useState(false);
-  const [play, pause, shuffleList, playing, playPlaylist] = usePlayer(
-    (state) => [
+  const [play, pause, playing, playPlaylist, playlists, playPlaylistRandom] =
+    usePlayer((state) => [
       state.play,
       state.pause,
-      state.shuffle,
       state.isPlaying,
       state.playPLaylist,
-    ]
-  );
+      state.playlists,
+      state.playPLaylistRandom
+    ]);
+
+  const name = useParams().name;
+  const title: string = name ? name : "";
+  const songs: Track[] = playlists[title];
 
   const handlePlay = () => {
     if (playing) {
@@ -28,9 +28,11 @@ const Playlist: React.FC<PlaylistProps> = ({ title = "Liked", songs }) => {
       if (played) {
         play();
       } else {
-        playPlaylist("liked");
-        if (shuffle && !played) {
-          shuffleList();
+        if(shuffle){
+          playPlaylistRandom(title);
+        }
+        else{
+          playPlaylist(title);
         }
         setPlayed(true);
       }

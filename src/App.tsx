@@ -4,6 +4,7 @@ import SearchPage from "./pages/Search";
 import Home from "./pages/Home";
 import MobileFooter from "./components/MobileFooter";
 import Saved from "./pages/Saved";
+import Playlist from "./pages/Playlist";
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,14 @@ const App: React.FC = () => {
           element={
             <MobileFooter>
               <Saved />
+            </MobileFooter>
+          }
+        />
+        <Route
+          path="/playlist/:name"
+          element={
+            <MobileFooter>
+              <Playlist />
             </MobileFooter>
           }
         />

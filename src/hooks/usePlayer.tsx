@@ -25,6 +25,8 @@ interface PlayerState {
   progress: number;
   setProgress: (progress: number) => void;
   setNewSongDuration: (duration: number) => void;
+  addNewPlaylist: (playlistName: string, songs: Track[]) => void;
+  playPLaylistRandom: (playlistName: string) => void;
 }
 
 const mountSong = async (spotify: Track): Promise<ToSave> => {
@@ -184,6 +186,26 @@ const usePlayer = create<PlayerState>((set) => ({
     });
   },
 
+  playPLaylistRandom: async (playlistName) => {
+    const newSongs = await Promise.all(
+      playlistsJSON[playlistName].map((song: Track) => mountSong(song))
+    );
+
+    console.log(newSongs);
+
+    newSongs.sort(() => Math.random() - 0.5);
+
+    console.log(newSongs);
+
+    set((state) => {
+      return {
+        ...state,
+        songs: newSongs,
+        isPlaying: true,
+      };
+    });
+  },
+
   showControls: false,
 
   handleControls: () => {
@@ -214,6 +236,24 @@ const usePlayer = create<PlayerState>((set) => ({
         ...state,
         songs,
       };
+
+      return finalState;
+    });
+  },
+
+  addNewPlaylist: (playlistName, songs) => {
+    set((state) => {
+      const newPlaylists = {
+        ...state.playlists,
+        [playlistName]: songs,
+      };
+
+      const finalState = {
+        ...state,
+        playlists: newPlaylists,
+      };
+
+      localStorage.setItem("playlists", JSON.stringify(finalState.playlists));
 
       return finalState;
     });
