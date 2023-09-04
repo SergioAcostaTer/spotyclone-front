@@ -23,6 +23,7 @@ export interface Track {
   color: string;
 }
 
+
 async function playlist(link: string): Promise<Playlist> {
     console.log(link);
   if (!link)

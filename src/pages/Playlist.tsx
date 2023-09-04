@@ -1,42 +1,43 @@
 import { useState } from "react";
 import SongCard from "../components/SongCard";
-import { Track } from "../services/search";
 import usePlayer from "../hooks/usePlayer";
 import { useParams } from "react-router-dom";
 
 const Playlist = () => {
   const [shuffle, setShuffle] = useState(true);
   const [played, setPlayed] = useState(false);
-  const [play, pause, playing, playPlaylist, playlists, playPlaylistRandom] =
-    usePlayer((state) => [
-      state.play,
-      state.pause,
-      state.isPlaying,
-      state.playPLaylist,
-      state.playlists,
-      state.playPLaylistRandom
-    ]);
+  const [
+    pause,
+    playin,
+    playPlaylist,
+    playlists,
+    playPlaylistRandom,
+    nowPlaylist,
+  ] = usePlayer((state) => [
+    state.pause,
+    state.isPlaying,
+    state.playPlaylist,
+    state.playlists,
+    state.playPlaylistRandom,
+    state.nowPlaying,
+  ]);
 
   const name = useParams().name;
   const title: string = name ? name : "";
-  const songs: Track[] = playlists[title];
+  const songs = playlists.find((playlist) => playlist.name === title);
+  const playing = nowPlaylist === title;
 
   const handlePlay = () => {
     if (playing) {
       pause();
     } else {
-      if (played) {
-        play();
+      if (shuffle) {  
+        playPlaylistRandom(title);
       } else {
-        if(shuffle){
-          playPlaylistRandom(title);
-        }
-        else{
-          playPlaylist(title);
-        }
-        setPlayed(true);
+        playPlaylist(title);
       }
     }
+    setPlayed(true);
   };
 
   return (
@@ -102,11 +103,11 @@ const Playlist = () => {
         </div>
       </div>
 
-      {songs?.length === 0 ? (
+      {songs?.songs?.length === 0 ? (
         <p>No songs in the playlist.</p>
       ) : (
         <div className="w-full mb-[117px]">
-          {songs?.map((song) => (
+          {songs?.songs?.map((song) => (
             <SongCard key={song.id} song={song} />
           ))}
         </div>

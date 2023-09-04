@@ -22,6 +22,8 @@ const MobileFooter = ({ children }: MobileLayoutProps) => {
     setNewSongDuration,
     prev,
     next,
+    addLiked,
+    removeLiked,
   ] = usePlayer((state) => [
     state.songs,
     state.currentSongIndex,
@@ -35,6 +37,8 @@ const MobileFooter = ({ children }: MobileLayoutProps) => {
     state.setNewSongDuration,
     state.prevSong,
     state.nextSong,
+    state.addSongToPlaylist,
+    state.removeSongFromPlaylist,
   ]);
   const [userProgress, setUserProgress] = useState(progress);
 
@@ -42,29 +46,43 @@ const MobileFooter = ({ children }: MobileLayoutProps) => {
     setUserProgress(progress);
   }, [progress]);
 
-  const [liked, setLiked] = useState(
-    playlists.liked?.find((e) => e.id == songs[index]?.id) ? true : false
-  );
-
-  useEffect(() => {
-    setLiked(
-      playlists.liked?.find((e) => e.id == songs[index]?.id) ? true : false
+  const songInPlaylist = (playlistName: string, song: Track) => {
+    const playlist = playlists.find(
+      (playlist) => playlist.name === playlistName
     );
-  }, [index, isPlaying]);
+
+    if (!playlist) {
+      return false;
+    }
+
+    return playlist.songs.find((s) => s?.id === song?.id) ? true : false;
+    // return false
+  };
+
+  const [liked, setLiked] = useState(songInPlaylist("liked", songs[index]));
 
   useEffect(() => {
-    console.log(isPlaying);
-  }, [isPlaying]);
+    setLiked(songInPlaylist("liked", songs[index]));
+  }, [playlists]);
 
   const handleLike = () => {
-    // handleLikeSong(songs[index]);
-    // if (liked) {
-    //   removeLikedSong(songs[index]);
-    // } else {
-    //   addLikedSong(songs[index]);
-    // }
+    if (liked) {
+      removeLiked("liked", songs[index]);
+    } else {
+      addLiked("liked", songs[index]);
+    }
+
     setLiked(!liked);
   };
+
+  useEffect(() => {
+    if (songInPlaylist("liked", songs[index])) {
+      setLiked(true);
+    } else {
+      setLiked(false);
+    }
+  }, [index, songs]);
+
 
   const handlePlayPause = () => {
     if (isPlaying) {

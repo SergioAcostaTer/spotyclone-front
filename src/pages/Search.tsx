@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import SongCard from "../components/SongCard";
 import { useSearch } from "../hooks/useSearch";
 import { useParams } from "react-router-dom";
@@ -10,6 +11,10 @@ const SearchPage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
   };
+
+  // useEffect(() => {
+  //   onInputChange(q);
+  // }, [q]);
 
 
   return (

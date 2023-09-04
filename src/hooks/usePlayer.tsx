@@ -5,6 +5,7 @@ import { getYT } from "../services/getFromYt";
 
 interface PlayerState {
   songs: ToSave[];
+  queue: Track[];
   currentSongIndex: number;
   isPlaying: boolean;
   nextSong: () => void;
@@ -14,19 +15,19 @@ interface PlayerState {
   shuffle: () => void;
   addAndPlay: (spotify: Track) => Promise<void>;
   addSong: (spotify: Track) => Promise<void>;
-  addSongToPlaylist: (playlistName: string, song: Track) => void;
-  removeSongFromPlaylist: (playlistName: string, song: Track) => void;
-  playlists: {
-    [key: string]: Track[];
-  };
-  playPLaylist: (playlistName: string) => void;
   showControls: boolean;
   handleControls: () => void;
   progress: number;
   setProgress: (progress: number) => void;
   setNewSongDuration: (duration: number) => void;
   addNewPlaylist: (playlistName: string, songs: Track[]) => void;
-  playPLaylistRandom: (playlistName: string) => void;
+  playlists: { name: string; songs: Track[] }[];
+  addSongToPlaylist: (playlistName: string, song: Track) => void;
+  removeSongFromPlaylist: (playlistName: string, song: Track) => void;
+  playPlaylistRandom: (playlistName: string) => void;
+  playPlaylist: (playlistName: string) => void;
+  playlistIndex: number;
+  nowPlaying: string;
 }
 
 const mountSong = async (spotify: Track): Promise<ToSave> => {
@@ -57,25 +58,50 @@ const mountSong = async (spotify: Track): Promise<ToSave> => {
 const storedPlaylist = localStorage.getItem("playlists");
 const playlistsJSON = storedPlaylist
   ? JSON.parse(storedPlaylist)
-  : {
-      liked: [],
-    };
+  : [
+      {
+        name: "liked",
+        songs: [],
+      },
+    ];
 
 const usePlayer = create<PlayerState>((set) => ({
   songs: [],
   currentSongIndex: 0,
   isPlaying: false,
   playlists: playlistsJSON,
+  queue: [],
+  playlistIndex: 4,
+  nowPlaying: "",
 
   addSong: async (spotify: Track) => {
     const song = await mountSong(spotify);
     set((state) => ({ songs: [...state.songs, song] }));
   },
   nextSong: () => {
-    set((state) => ({
-      ...state,
-      currentSongIndex: (state.currentSongIndex + 1) % state.songs.length,
-    }));
+    set((state) => {
+      if (state.queue.length > 0) {
+        const mountOneMoreSong = async () => {
+          const song = await mountSong(state.queue[state.playlistIndex]);
+          set((state) => {
+            const newSongs = [...state.songs, song];
+            return {
+              ...state,
+              songs: newSongs,
+              isPlaying: true,
+              playlistIndex: state.playlistIndex + 1,
+            };
+          });
+        };
+
+        mountOneMoreSong();
+      }
+
+      return {
+        ...state,
+        currentSongIndex: (state.currentSongIndex + 1) % state.songs.length,
+      };
+    });
   },
   prevSong: () => {
     set((state) => ({
@@ -128,22 +154,30 @@ const usePlayer = create<PlayerState>((set) => ({
   },
   addSongToPlaylist: (playlistName, song) => {
     set((state) => {
-      if (!state.playlists[playlistName]) {
-        state.playlists[playlistName] = [];
-      }
+      const playlistIndex = state.playlists.findIndex(
+        (playlist) => playlist.name === playlistName
+      );
 
-      if (state.playlists[playlistName].find((s) => s.id === song.id)) {
+      if (playlistIndex === -1) {
         return state;
       }
 
-      const newPlaylists = [song, ...state.playlists[playlistName]];
+      const playlist = state.playlists[playlistIndex];
+
+      if (playlist.songs.find((s) => s.id === song.id)) {
+        return state;
+      }
+
+      const newSongs = [...playlist.songs, song];
+      const newPlaylists = [...state.playlists];
+      newPlaylists[playlistIndex] = {
+        ...playlist,
+        songs: newSongs,
+      };
 
       const finalState = {
         ...state,
-        playlists: {
-          ...state.playlists,
-          [playlistName]: newPlaylists,
-        },
+        playlists: newPlaylists,
       };
 
       localStorage.setItem("playlists", JSON.stringify(finalState.playlists));
@@ -154,16 +188,26 @@ const usePlayer = create<PlayerState>((set) => ({
 
   removeSongFromPlaylist: (playlistName, song) => {
     set((state) => {
-      const newPlaylists = [...state.playlists[playlistName]];
-      const index = newPlaylists.findIndex((s) => s.id === song.id);
-      newPlaylists.splice(index, 1);
+      const playlistIndex = state.playlists.findIndex(
+        (playlist) => playlist.name === playlistName
+      );
+
+      if (playlistIndex === -1) {
+        return state;
+      }
+
+      const playlist = state.playlists[playlistIndex];
+      const newSongs = playlist.songs.filter((s) => s.id !== song.id);
+
+      const newPlaylists = [...state.playlists];
+      newPlaylists[playlistIndex] = {
+        ...playlist,
+        songs: newSongs,
+      };
 
       const finalState = {
         ...state,
-        playlists: {
-          ...state.playlists,
-          [playlistName]: newPlaylists,
-        },
+        playlists: newPlaylists,
       };
 
       localStorage.setItem("playlists", JSON.stringify(finalState.playlists));
@@ -172,36 +216,54 @@ const usePlayer = create<PlayerState>((set) => ({
     });
   },
 
-  playPLaylist: async (playlistName) => {
-    const newSongs = await Promise.all(
-      playlistsJSON[playlistName].map((song: Track) => mountSong(song))
+  playPlaylist: async (playlistName) => {
+    const playlist = playlistsJSON.find(
+      (playlist: { name: string }) => playlist.name === playlistName
+    );
+
+    if (!playlist) {
+      return;
+    }
+
+    const loadedTwoSongs = await Promise.all(
+      playlist.songs.slice(0, 4).map((song: Track) => mountSong(song))
     );
 
     set((state) => {
       return {
         ...state,
-        songs: newSongs,
+        songs: loadedTwoSongs,
         isPlaying: true,
+        queue: playlist.songs,
+        nowPlaying: playlistName,
+        playlistIndex: 4,
       };
     });
   },
 
-  playPLaylistRandom: async (playlistName) => {
-    const newSongs = await Promise.all(
-      playlistsJSON[playlistName].map((song: Track) => mountSong(song))
+  playPlaylistRandom: async (playlistName) => {
+    const playlist = playlistsJSON.find(
+      (playlist: { name: string }) => playlist.name === playlistName
     );
 
-    console.log(newSongs);
+    if (!playlist) {
+      return;
+    }
 
-    newSongs.sort(() => Math.random() - 0.5);
+    const songs = [...playlist.songs].sort(() => Math.random() - 0.5);
 
-    console.log(newSongs);
+    const newSongs = await Promise.all(
+      songs.slice(0, 4).map((song: Track) => mountSong(song))
+    );
 
     set((state) => {
       return {
         ...state,
         songs: newSongs,
         isPlaying: true,
+        queue: songs,
+        nowPlaying: playlistName,
+        playlistIndex: 4,
       };
     });
   },
@@ -243,10 +305,20 @@ const usePlayer = create<PlayerState>((set) => ({
 
   addNewPlaylist: (playlistName, songs) => {
     set((state) => {
-      const newPlaylists = {
-        ...state.playlists,
-        [playlistName]: songs,
+      const playlistIndex = state.playlists.findIndex(
+        (playlist) => playlist.name === playlistName
+      );
+
+      if (playlistIndex !== -1) {
+        return state; // Playlist with the same name already exists
+      }
+
+      const newPlaylist = {
+        name: playlistName,
+        songs: songs,
       };
+
+      const newPlaylists = [...state.playlists, newPlaylist];
 
       const finalState = {
         ...state,

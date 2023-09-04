@@ -42,6 +42,13 @@ const useSearch = (
     };
   }, [searchTimer]);
 
+  useEffect(() => {
+    search(initialQuery).then((searchResults) => {
+      setResults(searchResults);
+      setLoading(false);
+    });
+  }, [initialQuery]);
+
   return [results, loading, actualQ, handleInputChange];
 };
 

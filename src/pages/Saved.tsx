@@ -64,9 +64,13 @@ const Saved: React.FC = () => {
 
       <button onClick={() => addPlaylist(query)}>Add</button>
 
-      {Object.keys(playlists).map((key) => {
-        return <PlaylistButton key={key} name={key} />;
-      })}
+      {
+        playlists.map((playlist) => (
+          <PlaylistButton key={playlist.name} name={playlist.name} />
+        ))
+      }
+
+      
     </div>
   );
 };

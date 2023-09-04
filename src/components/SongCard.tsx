@@ -8,36 +8,46 @@ interface Props {
 }
 
 const SongCard = ({ song }: Props) => {
-  const [
-    addAndPlay,
-    addLiked,
-    removeLiked,
-    songs,
-    index,
-    playlists,
-  ] = usePlayer((state) => [
-    state.addAndPlay,
-    state.addSongToPlaylist,
-    state.removeSongFromPlaylist,
-    state.songs,
-    state.currentSongIndex,
-    state.playlists,
-  ]);
+  const [addAndPlay, addLiked, removeLiked, songs, index, playlists] =
+    usePlayer((state) => [
+      state.addAndPlay,
+      state.addSongToPlaylist,
+      state.removeSongFromPlaylist,
+      state.songs,
+      state.currentSongIndex,
+      state.playlists,
+    ]);
+
+  const songInPlaylist = (playlistName: string, song: Track) => {
+    const playlist = playlists.find(
+      (playlist) => playlist.name === playlistName
+    );
+
+    if (!playlist) {
+      return false;
+    }
+
+    return playlist.songs.find((s) => s.id === song.id) ? true : false;
+  };
+
+  const [liked, setLiked] = useState(songInPlaylist("liked", song));
 
   const handleLikeSong = (song: Track) => {
-    addLiked("liked", song);
-    console.log(playlists.liked);
-
-    if (playlists.liked.includes(song)) {
+    if (songInPlaylist("liked", song)) {
       removeLiked("liked", song);
     } else {
       addLiked("liked", song);
     }
   };
 
-  const [liked, setLiked] = useState(
-    playlists.liked.find((e) => e.id == song.id) ? true : false
-  );
+  useEffect(() => {
+    if (songInPlaylist("liked", song)) {
+      setLiked(true);
+    } else {
+      setLiked(false);
+    }
+  }, [index, songs]);
+
   const [sounding, setSounding] = useState(
     songs[index]?.id == song?.id ? true : false
   );
